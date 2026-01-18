@@ -18,7 +18,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 import asyncio
 import time
-from typing import List, Optional, Any
+from typing import List, Any
 
 import chainlit as cl
 from dotenv import load_dotenv
