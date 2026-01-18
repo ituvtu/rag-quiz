@@ -13,21 +13,34 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Login to Hugging Face
+      - name: Add HF metadata to README
         run: |
-          echo "${{ secrets.HF_TOKEN }}" | docker login -u ituvtu --password-stdin registry.hf.space
-
-      - name: Build Docker image
-        run: |
-          docker build \
-            --build-arg HF_TOKEN=${{ secrets.HF_TOKEN }} \
-            -t registry.hf.space/ituvtu/rag-quiz-demo:latest .
+          cat > README_HF.md << 'EOF'
+          ---
+          title: RAG Quiz Demo
+          emoji: 📚
+          colorFrom: blue
+          colorTo: purple
+          sdk: docker
+          app_file: app_c.py
+          pinned: false
+          license: mit
+          ---
+          EOF
+          cat README.md >> README_HF.md
+          mv README_HF.md README.md
+          git add README.md
+          git commit -m "Add HF metadata for Spaces" || true
 
       - name: Push to Hugging Face Spaces
         run: |
-          docker push registry.hf.space/ituvtu/rag-quiz-demo:latest
-
-      - name: Logout
-        if: always()
-        run: docker logout registry.hf.space
+          git config --global user.email "bot@github.com"
+          git config --global user.name "GitHub Bot"
+          
+          git remote add hf https://ituvtu:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/ituvtu/rag-quiz-demo
+          git push -u hf main --force
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
