@@ -26,7 +26,6 @@ temp_sessions/
 uploads/
 *.pdf
 *.docx
-*.txt
 
 # IDEs
 .vscode/
