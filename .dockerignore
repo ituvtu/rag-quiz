@@ -1,0 +1,13 @@
+.venv/
+.vscode/
+.git/
+.gitignore
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+temp_sessions/
+.DS_Store
+.idea/
+*.log
+.ipynb_checkpoints/

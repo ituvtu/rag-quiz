@@ -1,0 +1,33 @@
+name: Deploy to Hugging Face Spaces
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Hugging Face
+        run: |
+          echo "${{ secrets.HF_TOKEN }}" | docker login -u ituvtu --password-stdin registry.hf.space
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg HF_TOKEN=${{ secrets.HF_TOKEN }} \
+            -t registry.hf.space/ituvtu/rag-quiz-demo:latest .
+
+      - name: Push to Hugging Face Spaces
+        run: |
+          docker push registry.hf.space/ituvtu/rag-quiz-demo:latest
+
+      - name: Logout
+        if: always()
+        run: docker logout registry.hf.space
