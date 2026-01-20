@@ -14,7 +14,6 @@ from modules.prompts import SYSTEM_REFINE_QUERY, get_answer_instruction
 from modules.rag_engine import create_vectorstore, get_hybrid_retriever, split_documents
 from setup_core import init_llm
 
-# Налаштовуємо базовий логгер для всього додатка
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -164,14 +163,7 @@ def get_sources_elements(docs: List[Document]):
         
         if key not in seen and src and os.path.exists(src):
             lbl = f"{name} (p. {page})"
-            elements.append(
-                cl.File(
-                    name=lbl,
-                    display="side",
-                    path=src,
-                    mime="application/pdf",
-                )
-            )
+            elements.append(cl.Pdf(name=lbl, display="side", path=src, page=page))
             names.append(lbl)
             seen.add(key)
     return names, elements
