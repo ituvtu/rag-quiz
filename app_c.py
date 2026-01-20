@@ -1,6 +1,12 @@
 import logging
 import os
 
+# Налаштовуємо базовий логгер для всього додатка
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
 noisy_libraries = [
     "chainlit", 
     "watchfiles", 
@@ -43,35 +49,84 @@ if not os.path.exists(TEMP_SESSIONS_FOLDER):
 async def index_files_workflow(files: List[cl.File]):
     start_time = time.time()
     session_path = cl.user_session.get("session_folder")
-    if not session_path: return
+    if not session_path: 
+        logging.error("No session folder found")
+        return
 
     try:
         async with cl.Step(name="Processing files", type="run") as step:
             step.input = f"🚀 Reading {len(files)} files..."
             await step.update()
+            logging.info(f"Starting to process {len(files)} files")
 
             tasks = [save_and_load_pdf(f, session_path) for f in files]
-            results = await asyncio.gather(*tasks)
-            all_docs = [doc for res in results for doc in res]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Перевіряємо на помилки і збираємо тільки успішні результати
+            all_docs = []
+            for i, result in enumerate(results):
+                if isinstance(result, BaseException):
+                    error_msg = f"Error loading file {files[i].name}: {str(result)}"
+                    logging.error(error_msg)
+                    step.output = f"❌ {error_msg}"
+                    await cl.Message(content=f"⚠️ {error_msg}").send()
+                    return
+                elif isinstance(result, list):
+                    all_docs.extend(result)
+                else:
+                    logging.warning(f"Unexpected result type for file {files[i].name}: {type(result)}")
+            
+            logging.info(f"Loaded {len(all_docs)} documents")
 
             if not all_docs:
-                step.output = "❌ Failed."
+                error_msg = "No documents loaded from PDF files"
+                logging.error(error_msg)
+                step.output = f"❌ {error_msg}"
+                await cl.Message(content=f"⚠️ {error_msg}").send()
                 return
 
             step.input = f"🧠 Semantic analysis ({len(all_docs)} pages)..."
             await step.update()
-            new_chunks = await split_documents(all_docs)
+            logging.info("Starting semantic chunking...")
+            
+            try:
+                new_chunks = await split_documents(all_docs)
+                logging.info(f"Created {len(new_chunks)} chunks")
+            except Exception as e:
+                error_msg = f"Error during semantic analysis: {str(e)}"
+                logging.error(error_msg)
+                step.output = f"❌ {error_msg}"
+                await cl.Message(content=f"⚠️ {error_msg}").send()
+                return
 
             step.input = f"📊 Indexing ({len(new_chunks)} chunks)..."
             await step.update()
+            logging.info("Starting vectorstore creation...")
             
             vector_store = cl.user_session.get("vectorstore")
             all_splits: List[Document] = cl.user_session.get("all_splits") or []
             
-            vector_store = await create_vectorstore(new_chunks, vector_store)
+            try:
+                vector_store = await create_vectorstore(new_chunks, vector_store)
+                logging.info("Vectorstore created successfully")
+            except Exception as e:
+                error_msg = f"Error creating vectorstore: {str(e)}"
+                logging.error(error_msg)
+                step.output = f"❌ {error_msg}"
+                await cl.Message(content=f"⚠️ {error_msg}").send()
+                return
+            
             all_splits.extend(new_chunks)
             
-            retriever = get_hybrid_retriever(vector_store, all_splits)
+            try:
+                retriever = get_hybrid_retriever(vector_store, all_splits)
+                logging.info("Retriever created successfully")
+            except Exception as e:
+                error_msg = f"Error creating retriever: {str(e)}"
+                logging.error(error_msg)
+                step.output = f"❌ {error_msg}"
+                await cl.Message(content=f"⚠️ {error_msg}").send()
+                return
             
             cl.user_session.set("vectorstore", vector_store)
             cl.user_session.set("all_splits", all_splits)
@@ -79,11 +134,13 @@ async def index_files_workflow(files: List[cl.File]):
 
             elapsed = time.time() - start_time
             step.output = f"✅ Done ({elapsed:.1f}s)"
+            logging.info(f"Processing completed in {elapsed:.1f}s")
         
         await cl.Message(content=f"✅ Ready! ({elapsed:.1f}s)").send()
     except Exception as e:
-        logging.error(f"Error in index_files_workflow: {e}")
-        await cl.Message(content=f"⚠️ Error processing files: {str(e)}").send()
+        error_msg = f"Unexpected error in index_files_workflow: {str(e)}"
+        logging.error(error_msg, exc_info=True)
+        await cl.Message(content=f"⚠️ {error_msg}").send()
 
 
 async def refine_question(llm, question: str, history: List):

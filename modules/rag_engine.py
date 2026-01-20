@@ -33,17 +33,30 @@ class SimpleEnsembleRetriever(BaseRetriever):
 
 
 async def split_documents(documents: List[Document]) -> List[Document]:
+    import logging
+    logging.info("Initializing embeddings model for chunking...")
     embeddings_model = init_embeddings()
+    logging.info("Creating semantic chunker...")
     chunker = SemanticChunker(embeddings_model, breakpoint_threshold_type="percentile")
-    return await cl.make_async(chunker.split_documents)(documents)
+    logging.info(f"Splitting {len(documents)} documents...")
+    result = await cl.make_async(chunker.split_documents)(documents)
+    logging.info(f"Split into {len(result)} chunks")
+    return result
 
 
 async def create_vectorstore(chunks: List[Document], existing_store=None):
+    import logging
+    logging.info("Initializing embeddings model for vectorstore...")
     embeddings_model = init_embeddings()
     if existing_store is None:
-        return await cl.make_async(FAISS.from_documents)(chunks, embeddings_model)
+        logging.info(f"Creating new FAISS vectorstore with {len(chunks)} chunks...")
+        result = await cl.make_async(FAISS.from_documents)(chunks, embeddings_model)
+        logging.info("FAISS vectorstore created successfully")
+        return result
     else:
+        logging.info(f"Adding {len(chunks)} chunks to existing vectorstore...")
         await cl.make_async(existing_store.add_documents)(chunks)
+        logging.info("Chunks added to existing vectorstore")
         return existing_store
 
 
