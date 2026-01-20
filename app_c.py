@@ -1,5 +1,18 @@
+import asyncio
 import logging
 import os
+import time
+from typing import List, Any
+
+import chainlit as cl
+from dotenv import load_dotenv
+from langchain_core.documents import Document
+from langchain_core.messages import HumanMessage, SystemMessage
+
+from modules.file_handler import cleanup_folder, save_and_load_pdf
+from modules.prompts import SYSTEM_REFINE_QUERY, get_answer_instruction
+from modules.rag_engine import create_vectorstore, get_hybrid_retriever, split_documents
+from setup_core import init_llm
 
 # Налаштовуємо базовий логгер для всього додатка
 logging.basicConfig(
@@ -8,34 +21,19 @@ logging.basicConfig(
 )
 
 noisy_libraries = [
-    "chainlit", 
-    "watchfiles", 
-    "sentence_transformers", 
+    "chainlit",
+    "watchfiles",
+    "sentence_transformers",
     "faiss",
     "httpcore",
     "httpx",
-    "huggingface_hub"
+    "huggingface_hub",
 ]
 
 for lib in noisy_libraries:
     logging.getLogger(lib).setLevel(logging.ERROR)
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
-import asyncio
-import time
-from typing import List, Any
-
-import chainlit as cl
-from dotenv import load_dotenv
-
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.documents import Document
-
-from setup_core import init_llm
-from modules.file_handler import save_and_load_pdf, cleanup_folder
-from modules.rag_engine import split_documents, create_vectorstore, get_hybrid_retriever
-from modules.prompts import SYSTEM_REFINE_QUERY, get_answer_instruction
 
 load_dotenv()
 
@@ -62,7 +60,6 @@ async def index_files_workflow(files: List[cl.File]):
             tasks = [save_and_load_pdf(f, session_path) for f in files]
             results = await asyncio.gather(*tasks, return_exceptions=True)
             
-            # Перевіряємо на помилки і збираємо тільки успішні результати
             all_docs = []
             for i, result in enumerate(results):
                 if isinstance(result, BaseException):
@@ -144,7 +141,8 @@ async def index_files_workflow(files: List[cl.File]):
 
 
 async def refine_question(llm, question: str, history: List):
-    if not history: return question
+    if not history:
+        return question
     
     recent = history[-CONVERSATION_HISTORY_MESSAGES:]
     hist_text = "\n".join([f"{r}: {t}" for r, t in recent])
@@ -182,7 +180,8 @@ async def start():
         s_id = cl.user_session.get("id")
         if s_id:
             s_path = os.path.join(TEMP_SESSIONS_FOLDER, str(s_id))
-            if not os.path.exists(s_path): os.makedirs(s_path)
+            if not os.path.exists(s_path):
+                os.makedirs(s_path)
             cl.user_session.set("session_folder", s_path)
 
         await cl.Message(content="Hi! 👋 Upload PDFs to start.").send()
@@ -205,7 +204,8 @@ async def main(message: cl.Message):
         if pdfs:
             await index_files_workflow(pdfs)
         
-        if not message.content: return
+        if not message.content:
+            return
 
         retriever = cl.user_session.get("retriever")
         if not retriever:
@@ -242,7 +242,8 @@ async def main(message: cl.Message):
         msg.elements = elements
         await msg.update()
         
-        if history is None: history = []
+        if history is None:
+            history = []
         history.append(("user", message.content))
         history.append(("assistant", full_resp))
         cl.user_session.set("history", history)
