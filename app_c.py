@@ -164,7 +164,14 @@ def get_sources_elements(docs: List[Document]):
         
         if key not in seen and src and os.path.exists(src):
             lbl = f"{name} (p. {page})"
-            elements.append(cl.Pdf(name=lbl, display="side", path=src, page=page))
+            elements.append(
+                cl.File(
+                    name=lbl,
+                    display="side",
+                    path=src,
+                    mime="application/pdf",
+                )
+            )
             names.append(lbl)
             seen.add(key)
     return names, elements
