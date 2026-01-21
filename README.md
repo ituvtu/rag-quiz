@@ -23,16 +23,14 @@ Interactive application for analyzing PDF documents using **Retrieval-Augmented 
 
 ## 🚀 Quick Start
 
-### Try Online (No Setup Required)
+### 🌐 Live Demo
 
-Deploy to **Hugging Face Spaces** in 5 minutes:
-1. Click "Create Space" on [huggingface.co/spaces](https://huggingface.co/spaces)
-2. Add `HUGGINGFACEHUB_API_TOKEN` as a secret
-3. Push this repo to your Space
+**Hugging Face Space**: [rag-quiz-demo](https://huggingface.co/spaces/ituvtu/rag-quiz-demo)  
+⚠️ *Note: Space preview is not available due to platform limitations. Full preview functionality works on local deployment.*
 
-📖 **Detailed guide**: See [DEPLOY_HF_SPACES.md](DEPLOY_HF_SPACES.md)
+### Local Installation
 
-### Prerequisites
+#### Prerequisites
 
 - Python 3.10 or higher
 - Hugging Face API token ([Get one here](https://huggingface.co/settings/tokens))
