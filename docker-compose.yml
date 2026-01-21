@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  rag-quiz:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-50}
+      - CONVERSATION_HISTORY_MESSAGES=${CONVERSATION_HISTORY_MESSAGES:-3}
+    volumes:
+      - ./temp_sessions:/app/temp_sessions
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

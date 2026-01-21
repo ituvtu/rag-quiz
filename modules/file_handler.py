@@ -1,12 +1,18 @@
 import os
 import shutil
+import logging
+from typing import List
+
 import chainlit as cl
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
-from typing import List
 
-async def save_and_load_pdf(uploaded_file: cl.File, storage_path: str) -> List[Document]:
-    import logging
+
+async def save_and_load_pdf(
+    uploaded_file: cl.File,
+    storage_path: str
+) -> List[Document]:
+    """Load PDF file and extract documents."""
     try:
         logging.info(f"Processing file: {uploaded_file.name}")
         if not os.path.exists(storage_path):
@@ -53,7 +59,9 @@ async def save_and_load_pdf(uploaded_file: cl.File, storage_path: str) -> List[D
         logging.error(f"Error in save_and_load_pdf for {uploaded_file.name}: {error}", exc_info=True)
         raise
 
-def cleanup_folder(folder_path: str):
+
+def cleanup_folder(folder_path: str) -> None:
+    """Remove folder and its contents."""
     if folder_path and os.path.exists(folder_path):
         try:
             shutil.rmtree(folder_path)

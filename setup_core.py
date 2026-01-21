@@ -1,8 +1,12 @@
+from typing import Any
+
 from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace, HuggingFaceEmbeddings
 import logging
 import os
 
-def init_llm():
+
+def init_llm() -> ChatHuggingFace:
+    """Initialize and configure the HuggingFace LLM."""
     model_id = "meta-llama/Meta-Llama-3.1-8B-Instruct"
     logging.info(f"Initializing LLM: {model_id}")
     
@@ -27,7 +31,9 @@ def init_llm():
     
     return chat_model
 
-def init_embeddings():
+
+def init_embeddings() -> HuggingFaceEmbeddings:
+    """Initialize embeddings model for semantic search."""
     model_name = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
     logging.info(f"Initializing embeddings model: {model_name}")
     

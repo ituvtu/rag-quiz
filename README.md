@@ -30,6 +30,29 @@ Interactive application for analyzing PDF documents using **Retrieval-Augmented 
 
 ### Installation
 
+#### Option A: Docker (Recommended for production)
+
+1. Clone the repository:
+```bash
+git clone https://github.com/ituvtu/rag-quiz.git
+cd rag-quiz
+```
+
+2. Create `.env` file:
+```bash
+cp .env.example .env
+# Edit .env and add your HUGGINGFACEHUB_API_TOKEN
+```
+
+3. Deploy with Docker Compose:
+```bash
+docker-compose up -d
+```
+
+Open `http://localhost:8000` in your browser.
+
+#### Option B: Local Development
+
 1. Clone the repository:
 ```bash
 git clone https://github.com/ituvtu/rag-quiz.git
@@ -48,20 +71,22 @@ source .venv/bin/activate    # Linux/Mac
 pip install -r requirements.txt
 ```
 
-4. Create `.env` file in the project root:
-```env
-HUGGINGFACEHUB_API_TOKEN=your_token_here
+4. Create `.env` file:
+```bash
+cp .env.example .env
+# Edit .env and add your HUGGINGFACEHUB_API_TOKEN
 ```
 
 ### Run the Application
 
+**Docker:**
 ```bash
-chainlit run app_c.py -w
+docker-compose up
 ```
 
-Or with Python module:
+**Local:**
 ```bash
-python -m chainlit run app_c.py -w
+chainlit run app_c.py -w
 ```
 
 The app will open at `http://localhost:8000`

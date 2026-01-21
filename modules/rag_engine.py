@@ -1,23 +1,33 @@
-from typing import List, Any
+from typing import List, Any, Optional
+
 import chainlit as cl
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_community.vectorstores import FAISS
 from langchain_community.retrievers import BM25Retriever
+
 from setup_core import init_embeddings
+import logging
 
 DOCUMENTS_PER_RETRIEVER = 5 
 MAX_COMBINED_DOCUMENTS = 6     
 
 
 class SimpleEnsembleRetriever(BaseRetriever):
-    retrievers: list
+    """Ensemble retriever combining multiple retrieval strategies."""
+    retrievers: List[BaseRetriever]
     
-    def _get_relevant_documents(self, query: str, *, run_manager: Any = None) -> List[Document]:
+    def _get_relevant_documents(
+        self,
+        query: str,
+        *,
+        run_manager: Optional[Any] = None
+    ) -> List[Document]:
+        """Get combined results from all retrievers."""
         results_lists = [r.invoke(query) for r in self.retrievers]
-        combined_docs = []
-        doc_ids = set()
+        combined_docs: List[Document] = []
+        doc_ids: set = set()
         
         max_len = max(len(r) for r in results_lists)
         for i in range(max_len):
@@ -33,7 +43,7 @@ class SimpleEnsembleRetriever(BaseRetriever):
 
 
 async def split_documents(documents: List[Document]) -> List[Document]:
-    import logging
+    """Split documents into semantic chunks."""
     logging.info("Initializing embeddings model for chunking...")
     embeddings_model = init_embeddings()
     logging.info("Creating semantic chunker...")
@@ -44,8 +54,11 @@ async def split_documents(documents: List[Document]) -> List[Document]:
     return result
 
 
-async def create_vectorstore(chunks: List[Document], existing_store=None):
-    import logging
+async def create_vectorstore(
+    chunks: List[Document],
+    existing_store: Optional[FAISS] = None
+) -> FAISS:
+    """Create or update FAISS vectorstore."""
     logging.info("Initializing embeddings model for vectorstore...")
     embeddings_model = init_embeddings()
     if existing_store is None:
@@ -60,7 +73,11 @@ async def create_vectorstore(chunks: List[Document], existing_store=None):
         return existing_store
 
 
-def get_hybrid_retriever(vector_store, all_chunks: List[Document]) -> BaseRetriever:
+def get_hybrid_retriever(
+    vector_store: FAISS,
+    all_chunks: List[Document]
+) -> SimpleEnsembleRetriever:
+    """Create hybrid retriever combining FAISS and BM25."""
     faiss_retriever = vector_store.as_retriever(search_kwargs={"k": DOCUMENTS_PER_RETRIEVER})
     bm25_retriever = BM25Retriever.from_documents(all_chunks)
     bm25_retriever.k = DOCUMENTS_PER_RETRIEVER

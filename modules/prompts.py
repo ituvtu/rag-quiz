@@ -1,3 +1,5 @@
+"""System prompts and instruction templates for the RAG pipeline."""
+
 SYSTEM_REFINE_QUERY = (
     "Given the chat history and the latest user question, "
     "formulate a standalone question which can be understood without the chat history. "
@@ -7,6 +9,7 @@ SYSTEM_REFINE_QUERY = (
 
 
 def get_answer_instruction(context_text: str, user_question: str) -> str:
+    """Generate system instruction for answering user questions with provided context."""
     return (
         f"You are a specialized AI assistant acting as a **Translation and Knowledge Engine**.\n"
         f"Your task is to answer the user's question using strictly the provided context below.\n\n"
