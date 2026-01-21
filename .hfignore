@@ -1,0 +1,58 @@
+# Files to exclude from Hugging Face Spaces deployment
+
+# Docker configuration (not needed for HF Spaces)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Development & self-hosted deployment documentation
+PRODUCTION_CHECKLIST.md
+DEVELOPMENT.md
+
+# Development scripts (use DEPLOY_HF_SPACES.md instead)
+scripts/
+
+# IDE and tools configuration
+.vscode/
+.idea/
+.ruff_cache/
+
+# Python virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Git files
+.git/
+.gitignore
+.github/
+
+# Chainlit UI config (auto-generated at runtime)
+.chainlit/
+
+# File uploads tracking
+.files/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+
+# Temporary data (auto-created at runtime)
+temp_sessions/
+uploads/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+.env
+

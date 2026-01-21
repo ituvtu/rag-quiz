@@ -171,6 +171,22 @@ class Config:
 - Non-critical failure handling
 - User-friendly error messages
 
+## Deployment Options
+
+### 🌐 Hugging Face Spaces (Free Cloud Hosting)
+- **Zero Setup** - Push to HF Spaces in 5 minutes
+- **Free Hosting** - No credit card required
+- **Auto-Scaling** - Automatic resource management
+- **Easy Sharing** - Instant public URL
+- 📖 See [DEPLOY_HF_SPACES.md](DEPLOY_HF_SPACES.md)
+
+### 🐳 Docker (Self-Hosted)
+- **Full Control** - Run anywhere (AWS, DigitalOcean, etc.)
+- **Production-Ready** - Multi-stage optimized build
+- **One-Command Deploy** - `docker-compose up -d`
+- **Health Checks** - Built-in monitoring
+- 📖 See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md)
+
 ## Development Practices
 
 ### Code Standards
