@@ -34,4 +34,4 @@ RUN mkdir -p temp_sessions && chmod 777 temp_sessions
 EXPOSE 8000
 
 # Run application
-CMD ["chainlit", "run", "app_c.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["chainlit", "run", "app_c.py", "--host", "0.0.0.0", "--port", "8000", "--headless"]

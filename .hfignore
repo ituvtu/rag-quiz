@@ -1,8 +1,6 @@
 # Files to exclude from Hugging Face Spaces deployment
 
-# Docker configuration (not needed for HF Spaces)
-Dockerfile
-docker-compose.yml
+# Docker compose (not needed for HF Spaces SDK deployment)
 .dockerignore
 
 # Development & self-hosted deployment documentation
