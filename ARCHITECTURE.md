@@ -4,24 +4,24 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Chainlit Frontend                       │
-│                 (Web UI for Chat Interface)                  │
+│                      Chainlit Frontend                      │
+│                 (Web UI for Chat Interface)                 │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    app_c.py (Main App)                       │
+│                    app_c.py (Main App)                      │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │ Event Handlers (on_chat_start, on_message, etc.)     │   │
 │  └──────────────────────────────────────────────────────┘   │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │ Core Workflows                                       │   │
-│  │ • index_files_workflow()  - Process PDFs            │   │
-│  │ • load_pdf_files()        - Load documents          │   │
-│  │ • perform_semantic_analysis() - Chunk documents     │   │
-│  │ • create_and_store_vectorstore() - Index chunks     │   │
-│  │ • refine_question()       - Improve queries         │   │
-│  │ • handle_error()          - Centralized errors      │   │
+│  │ • index_files_workflow()  - Process PDFs             │   │
+│  │ • load_pdf_files()        - Load documents           │   │
+│  │ • perform_semantic_analysis() - Chunk documents      │   │
+│  │ • create_and_store_vectorstore() - Index chunks      │   │
+│  │ • refine_question()       - Improve queries          │   │
+│  │ • handle_error()          - Centralized errors       │   │
 │  └──────────────────────────────────────────────────────┘   │
 └────────────────────────┬────────────────────────────────────┘
                          │
@@ -37,7 +37,7 @@
    ┌──────────────────┐    ┌────────────────────┐
    │  RAG Pipeline    │    │  LLM & Embeddings  │
    │                  │    │                    │
-   │ • file_handler   │    │ • HuggingFace LLM │
+   │ • file_handler   │    │ • HuggingFace LLM  │
    │ • rag_engine     │    │ • Embeddings model │
    │ • prompts        │    │                    │
    └──────────────────┘    └────────────────────┘

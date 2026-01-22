@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 import time
-from typing import List, Any, Optional, Tuple, Dict
+from typing import List, Any, Optional, Tuple
 
 import chainlit as cl
 from dotenv import load_dotenv
@@ -397,7 +397,7 @@ async def main(message: cl.Message) -> None:
         history: List[Tuple[str, str]] = cl.user_session.get("history") or []
         
         refined_q = await refine_question(llm, message.content, history)
-        logger.debug(f"Retrieving documents using hybrid retriever")
+        logger.debug("Retrieving documents using hybrid retriever")
         
         docs = await cl.make_async(retriever.invoke)(refined_q)
         logger.debug(f"Retrieved {len(docs)} relevant documents")

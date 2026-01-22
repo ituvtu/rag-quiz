@@ -32,41 +32,20 @@ Interactive application for analyzing PDF documents using **Retrieval-Augmented 
 
 #### Prerequisites
 
+### Prerequisites
+
 - Python 3.10 or higher
 - Hugging Face API token ([Get one here](https://huggingface.co/settings/tokens))
 
 ### Installation
 
-#### Option A: Docker (Recommended for production)
-
 1. Clone the repository:
 ```bash
 git clone https://github.com/ituvtu/rag-quiz.git
 cd rag-quiz
 ```
 
-2. Create `.env` file:
-```bash
-cp .env.example .env
-# Edit .env and add your HUGGINGFACEHUB_API_TOKEN
-```
-
-3. Deploy with Docker Compose:
-```bash
-docker-compose up -d
-```
-
-Open `http://localhost:8000` in your browser.
-
-#### Option B: Local Development
-
-1. Clone the repository:
-```bash
-git clone https://github.com/ituvtu/rag-quiz.git
-cd rag-quiz
-```
-
-2. Create and activate virtual environment:
+2. Create virtual environment:
 ```bash
 python -m venv .venv
 .venv\Scripts\Activate.ps1  # Windows
@@ -86,12 +65,6 @@ cp .env.example .env
 
 ### Run the Application
 
-**Docker:**
-```bash
-docker-compose up
-```
-
-**Local:**
 ```bash
 chainlit run app_c.py -w
 ```
@@ -123,15 +96,114 @@ rag-quiz/
 
 ## 🔧 Configuration
 
-### LLM Settings (setup_core.py)
+All configuration via environment variables (see `.env.example`):
 
-- **Model**: `meta-llama/Meta-Llama-3.1-8B-Instruct`
+```bash
+# Required
+HUGGINGFACEHUB_API_TOKEN=your_token_here
+
+# Optional (defaults provided)
+CONVERSATION_HISTORY_MESSAGES=3      # Context window for question refinement
+LOG_LEVEL=INFO                        # DEBUG, INFO, WARNING, ERROR
+MAX_FILE_SIZE_MB=50                   # Maximum upload size
+TEMP_SESSIONS_FOLDER=temp_sessions    # Session storage
+```
+
+## 👨‍💻 Development & Contributing
+
+### Local Setup
+
+```bash
+# Clone repository
+git clone https://github.com/ituvtu/rag-quiz.git
+cd rag-quiz
+
+# Create virtual environment
+python -m venv .venv
+.venv\Scripts\Activate.ps1  # Windows
+source .venv/bin/activate   # Linux/Mac
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure
+cp .env.example .env
+# Edit .env and add HUGGINGFACEHUB_API_TOKEN
+```
+
+### Running Development Server
+
+```bash
+chainlit run app_c.py -w
+```
+
+Open `http://localhost:8000` and start developing!
+
+### Code Quality
+
+- **Type Hints**: 100% coverage
+- **Logging**: 65+ debug points for tracing
+- **Error Handling**: Centralized `handle_error()` function
+- **Testing**: Import and configuration validation
+
+### Key Modules
+
+#### `app_c.py` - Main Application
+- `load_pdf_files()` - Load PDFs into documents
+- `perform_semantic_analysis()` - Semantic chunking
+- `create_and_store_vectorstore()` - Create vector indices
+- `refine_question()` - Improve queries with conversation context
+- `handle_error()` - Centralized error handling
+- `@cl.on_chat_start` / `@cl.on_message` / `@cl.on_chat_end` - Event handlers
+
+#### `setup_core.py`
+```python
+init_llm()         # Returns ChatHuggingFace (Llama 3.1)
+init_embeddings()  # Returns Sentence Transformers
+```
+
+#### `modules/file_handler.py`
+```python
+save_and_load_pdf(file, path)  # Upload and load PDFs
+cleanup_folder(path)            # Clean session folders
+```
+
+#### `modules/rag_engine.py`
+```python
+split_documents(docs)                    # Semantic chunking
+create_vectorstore(chunks, existing)     # FAISS indexing
+get_hybrid_retriever(vectorstore, docs)  # BM25 + semantic search
+```
+
+### Performance Tips
+
+- **Profiling**: Use `cProfile` to identify bottlenecks
+- **Caching**: Consider caching embeddings model and vector indices
+- **Async**: All I/O operations use `cl.make_async()` for non-blocking execution
+- **Monitoring**: Track API rate limits (HF), memory (embeddings), response times
+
+## 📚 Architecture
+
+**RAG Pipeline**:
+1. **Upload** → PDFs loaded via PyPDF
+2. **Semantic Chunking** → Smart text splitting by topic
+3. **Embeddings** → Multilingual Sentence Transformers
+4. **Indexing** → FAISS vector store (semantic) + BM25 (keyword)
+5. **Retrieval** → Hybrid search combining both approaches
+6. **Generation** → Llama 3.1 via HuggingFace with source citations
+
+**Session Management**:
+- Per-user temporary folders in `temp_sessions/`
+- Auto-cleanup on session end
+- Conversation history for context-aware responses
+
+**LLM Configuration** (setup_core.py):
+- **Model**: Meta-Llama-3.1-8B-Instruct
 - **Max Tokens**: 512
 - **Temperature**: 0.01 (deterministic)
 - **Timeout**: 120 seconds
 
-### Retrieval Settings (modules/rag_engine.py)
-
+**Retrieval Configuration** (modules/rag_engine.py):
 - **Documents per Retriever**: 5
 - **Max Combined Results**: 6
-- **Chunking**: Semantic-based (percentile threshold)
+- **Chunking**: Semantic-based splitting
