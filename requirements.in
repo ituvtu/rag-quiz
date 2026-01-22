@@ -1,5 +1,5 @@
 # Core framework
-chainlit>=1.0.0
+chainlit>=1.4.0
 python-dotenv>=1.0.0
 
 # LangChain ecosystem (0.2.x with new versions)
