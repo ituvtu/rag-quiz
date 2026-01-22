@@ -3,6 +3,9 @@ from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace, HuggingF
 import logging
 import os
 
+# Global cache for embeddings model
+_embeddings_cache = None
+
 
 def init_llm() -> ChatHuggingFace:
     """Initialize and configure the HuggingFace LLM."""
@@ -32,18 +35,24 @@ def init_llm() -> ChatHuggingFace:
 
 
 def init_embeddings() -> HuggingFaceEmbeddings:
-    """Initialize embeddings model for semantic search."""
+    """Initialize embeddings model for semantic search (cached)."""
+    global _embeddings_cache
+    
+    if _embeddings_cache is not None:
+        logging.debug("Using cached embeddings model")
+        return _embeddings_cache
+    
     model_name = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-    logging.info(f"Initializing embeddings model: {model_name}")
+    logging.info(f"Initializing embeddings model: {model_name} (this may take a few minutes...)")
     
     try:
-        embeddings = HuggingFaceEmbeddings(
+        _embeddings_cache = HuggingFaceEmbeddings(
             model_name=model_name,
             model_kwargs={'device': 'cpu'},
             encode_kwargs={'normalize_embeddings': True}
         )
-        logging.info("Embeddings model initialized successfully")
-        return embeddings
+        logging.info("Embeddings model initialized and cached successfully")
+        return _embeddings_cache
     except Exception as e:
         logging.error(f"Error initializing embeddings: {e}", exc_info=True)
         raise

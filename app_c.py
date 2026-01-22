@@ -79,6 +79,10 @@ class Config:
 # Validate configuration on startup
 if not Config.validate():
     logger.error("Failed to validate application configuration")
+else:
+    logger.info("✅ Application configuration validated successfully")
+    logger.info(f"📂 Session folder: {Config.TEMP_SESSIONS_FOLDER}")
+    logger.info("🚀 Application ready to start - models will be loaded on first use")
 
 # Create convenient aliases for backward compatibility
 TEMP_SESSIONS_FOLDER = Config.TEMP_SESSIONS_FOLDER
