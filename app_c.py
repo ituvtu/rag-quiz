@@ -329,6 +329,12 @@ def get_sources_elements(docs: List[Document]) -> Tuple[List[str], List[Any]]:
     return names, elements
 
 
+logger.info("=" * 50)
+logger.info("✨ All event handlers registered")
+logger.info("Waiting for user connection...")
+logger.info("=" * 50)
+
+
 @cl.on_chat_start
 async def start():
     """Initialize chat session."""
@@ -440,3 +446,6 @@ async def main(message: cl.Message) -> None:
     except Exception as e:
         error_msg = f"Error processing message: {str(e)}"
         await handle_error(e, error_msg, send_message=True)
+
+
+logger.info("✅ Application fully initialized and ready to accept connections")
